@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+
+<script src="functions.js"></script>
+<body>
+    <h1>Simulation</h1>
+    <canvas id = "myCanva" height="500" width = "500"></canvas>
+    <form action="" id = "sizeForm">
+        <label for="inputSize">Choisis la taille des petits carrés : </label>
+        <input type="number" name="inputSize" id="inputSize">
+        <button type = "submit">Changer la taille</button>
+    </form>
+
+    <form action="" id = "creaturesForm">
+        <label for="creatureNum">Choisis le nombre de petits carrés : </label>
+        <input type="number" name="creaturesNum" id="creaturesNum">
+        <button type = "submit">Fixer le nombre de carrés</button>
+    </form>
+
+    <form action="" id = "foodForm">
+        <label for="foodNum">Choisis la quantité de nourriture : </label>
+        <input type="number" name="foodNum" id="foodNum">
+        <button type = "submit">Fixer la quantité de nourriture</button>
+    </form>
+    <script>
+        
+        let xSize = 5
+        let ySize = 5
+        let foodSizeX = 5
+        let foodSizeY = 5
+        let foodNumber = 10
+        let foodEnergy = 10
+        let foodArray = []
+        let creaturesNum = 1
+        let creaturesArray = []
+        let energyStart = 50;
+
+        let canvasWidth = 500;
+        let canvasHeight = 500;
+
+        let foodForm = document.getElementById('foodForm')
+            foodForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            const input = document.getElementById('foodNum');
+            foodNumber = input.value;
+            placeFood();
+        })
+
+        let creaturesForm = document.getElementById('creaturesForm')
+        creaturesForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            const input = document.getElementById('creaturesNum');
+            creaturesNum = input.value;
+            creaturesArray = initArray(creaturesNum)
+        })
+
+        function initArray(number) {  // initialise un array de points avec une position aléatoire
+            let array = [];
+            for(let i = 0; i < number; i++) {
+                array.push({
+                    id : i,
+                    posX : Math.round( Math.random() * (canvasWidth - xSize) ),
+                    posY : Math.round( Math.random() * (canvasHeight - ySize) ),
+                    energy : energyStart,
+                    isAlive : 1,
+                });
+            }
+            return array;
+        }
+
+        let sizeForm = document.getElementById("sizeForm")
+            sizeForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            const input = document.getElementById('inputSize')
+            const value = input.value;
+            xSize = value;
+            ySize = value;
+        })
+
+        
+        const canvas = document.getElementById('myCanva');
+        const ctx = canvas.getContext('2d');
+
+
+        function placeFood() {  //Créer un array "foodArray" qui contient la position des différentes nourritures puis les dessines en même temps
+            for(let i = 0; i < foodNumber; i++) {
+                foodArray.push({
+                    posX : Math.round( Math.random() * (canvasWidth - foodSizeX) ),
+                    posY : Math.round( Math.random() * (canvasHeight - foodSizeY) ),
+                    energy : foodEnergy,
+                    isEaten : 0,
+                })
+                
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for(let i = 0; i < foodArray.length; i++) { //Positionne la nourriture
+                ctx.fillStyle = 'green'
+                ctx.fillRect(foodArray[i]['posX'], foodArray[i]['posY'], foodSizeX, foodSizeY)
+
+                if(foodArray[i]['isEaten'] == 1) { //Efface la nourriture si elle a été mangée
+                    ctx.clearRect(foodArray[i]['posX'], foodArray[i]['posY'], foodSizeX, foodSizeY)
+                }
+            }
+            for(let i = 0; i < creaturesArray.length; i++) { //Gère le déplacement des créatures
+                if (creaturesArray[i]['energy'] > 0) {
+                    ctx.fillStyle = 'black'
+                    ctx.fillRect(creaturesArray[i]['posX'], creaturesArray[i]['posY'], xSize, ySize)
+                    creaturesArray[i]['energy'] = creaturesArray[i]['energy'] - 0.1
+
+                    creaturesArray[i]['posX'] = creaturesArray[i]['posX'] + Math.round(mixedRandom()*xSize)
+                    creaturesArray[i]['posY'] = creaturesArray[i]['posY'] + Math.round(mixedRandom()*ySize)
+
+                    for(let j = 0; j < foodArray.length; j++) {
+                        console.log('boucle j')
+                        if (((creaturesArray[i]['posX'] == foodArray[j]['posX'])) && (creaturesArray[i]['posY'] == foodArray[j]['posY']) && (foodArray[j]['isEaten'] == 0)) { //Si la créature est sur une nourriture non-mangée, elle la mange
+                            foodArray[j]['isEaten'] = 1;
+                            creaturesArray[i]['energy'] = creaturesArray[i]['energy'] + foodArray[j]['energy'];
+                            console.log('Debug')
+                        }
+                    }
+
+                    
+                }
+                if (creaturesArray[i]['energy'] == 0) {
+                    ctx.clearRect(creaturesArray[i]['posX'], creaturesArray[i]['posY'], xSize, ySize)
+                }
+
+            }
+            requestAnimationFrame(draw);
+        }
+
+        draw(creaturesArray)
+    </script>
+</body>
+</html>
+
+<!-- 
+                    let temp = creaturesArray[i]['posX']
+                    creaturesArray[i]['posX'] = creaturesArray[i]['posY'] + Math.random()*xSize
+                    creaturesArray[i]['posY'] = temp + Math.random()*ySize -->
