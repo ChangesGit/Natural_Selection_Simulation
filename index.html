@@ -122,8 +122,9 @@
                     creaturesArray[i]['posY'] = creaturesArray[i]['posY'] + Math.round(mixedRandom()*ySize)
 
                     for(let j = 0; j < foodArray.length; j++) {
-                        console.log('boucle j')
-                        if (((creaturesArray[i]['posX'] == foodArray[j]['posX'])) && (creaturesArray[i]['posY'] == foodArray[j]['posY']) && (foodArray[j]['isEaten'] == 0)) { //Si la créature est sur une nourriture non-mangée, elle la mange
+                        let dX = Math.abs(creaturesArray[i]['posX'] - foodArray[j]['posX']);
+                        let dY = Math.abs(creaturesArray[i]['posY'] - foodArray[j]['posY']);
+                        if ((dX < (xSize + foodSizeX)/2) && (dY < (ySize + foodSizeY)/2) && (foodArray[j]['isEaten'] == 0)) { //Vérification de la collision d'une créature avec une nourriture
                             foodArray[j]['isEaten'] = 1;
                             creaturesArray[i]['energy'] = creaturesArray[i]['energy'] + foodArray[j]['energy'];
                             console.log('Debug')
